@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>500 Nouns · Review → Fill-in-the-Blank Quiz + Audio</title>
+  <title>500 Nouns · Review → Quiz + Accuracy Tracking</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -13,7 +13,7 @@
       color: #0f172a;
     }
     .container {
-      max-width: 820px;
+      max-width: 860px;
       margin: 0 auto;
       background: white;
       border-radius: 28px;
@@ -24,9 +24,9 @@
     .sub { color: #475569; margin-top: 0.2rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; }
     .badge-review { background: #dbeafe; color: #1e40af; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.5rem; }
     .badge-quiz { background: #fef3c7; color: #92400e; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; }
-    .badge-tracker { background: #dcfce7; color: #166534; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; }
     .badge-blank { background: #fce7f3; color: #9d174d; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; }
     .badge-audio { background: #e0e7ff; color: #3730a3; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; }
+    .badge-accuracy { background: #fef3c7; color: #92400e; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; }
     .user-area { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; margin: 1.2rem 0 1.5rem; }
     .user-area label { font-weight: 600; }
     .user-area input { flex: 1; min-width: 180px; padding: 0.6rem 1rem; border-radius: 40px; border: 1px solid #cbd5e1; }
@@ -68,15 +68,7 @@
       max-width: 90%;
       margin-bottom: 0.6rem;
     }
-    .review-sentence {
-      font-size: 1.15rem;
-      color: #334155;
-      padding: 0.5rem 1rem;
-      background: #ffffff;
-      border-radius: 12px;
-      border-left: 4px solid #3b82f6;
-      flex: 1;
-    }
+    .review-sentence { font-size: 1.15rem; color: #334155; padding: 0.5rem 1rem; background: #ffffff; border-radius: 12px; border-left: 4px solid #3b82f6; flex: 1; }
     .review-translation { font-size: 0.95rem; color: #64748b; padding: 0.3rem 1rem; background: #f1f5f9; border-radius: 30px; }
     .review-status { margin-top: 1rem; font-size: 0.9rem; font-weight: 600; }
     .review-status.learned { color: #16a34a; }
@@ -99,10 +91,7 @@
     .audio-btn:hover { background: #c7d2fe; transform: scale(1.05); }
     .audio-btn:active { transform: scale(0.95); }
     .audio-btn.playing { background: #fca5a5; animation: pulse 0.5s ease-in-out; }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.15); }
-    }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
     
     .review-nav { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; align-items: center; }
     .review-nav button { background: #0f172a; color: white; border: none; padding: 0.5rem 1.8rem; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.15s; }
@@ -114,72 +103,17 @@
     
     /* Quiz Mode */
     .quiz-box { margin: 1.8rem 0; }
-    .q-item {
-      background: #f8fafc;
-      border-radius: 18px;
-      padding: 1.5rem 1.8rem;
-      margin-bottom: 1.2rem;
-      border: 1px solid #e2e8f0;
-    }
+    .q-item { background: #f8fafc; border-radius: 18px; padding: 1.5rem 1.8rem; margin-bottom: 1.2rem; border: 1px solid #e2e8f0; }
     .q-number { font-size: 0.75rem; color: #94a3b8; font-weight: 600; margin-bottom: 0.5rem; }
-    .q-sentence-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      margin-bottom: 0.8rem;
-    }
-    .q-sentence {
-      font-size: 1.15rem;
-      color: #0f172a;
-      padding: 0.8rem 1rem;
-      background: #ffffff;
-      border-radius: 12px;
-      border-left: 4px solid #3b82f6;
-      line-height: 1.6;
-      flex: 1;
-    }
-    .q-blank {
-      display: inline-block;
-      min-width: 120px;
-      border-bottom: 3px solid #3b82f6;
-      margin: 0 4px;
-      padding: 0 4px;
-      font-weight: 700;
-      color: #1e40af;
-      background: #eff6ff;
-      border-radius: 4px;
-    }
-    .q-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem 1rem;
-      margin-top: 0.6rem;
-    }
-    .q-options label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.95rem;
-      cursor: pointer;
-      background: white;
-      padding: 0.4rem 1rem 0.4rem 0.6rem;
-      border-radius: 40px;
-      border: 2px solid #e2e8f0;
-      transition: 0.15s;
-    }
+    .q-sentence-wrapper { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+    .q-sentence { font-size: 1.15rem; color: #0f172a; padding: 0.8rem 1rem; background: #ffffff; border-radius: 12px; border-left: 4px solid #3b82f6; line-height: 1.6; flex: 1; }
+    .q-blank { display: inline-block; min-width: 120px; border-bottom: 3px solid #3b82f6; margin: 0 4px; padding: 0 4px; font-weight: 700; color: #1e40af; background: #eff6ff; border-radius: 4px; }
+    .q-options { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; margin-top: 0.6rem; }
+    .q-options label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; cursor: pointer; background: white; padding: 0.4rem 1rem 0.4rem 0.6rem; border-radius: 40px; border: 2px solid #e2e8f0; transition: 0.15s; }
     .q-options label:hover { background: #f1f5f9; border-color: #94a3b8; }
     .q-options label.selected { border-color: #3b82f6; background: #eff6ff; }
     .q-options input { accent-color: #0f172a; width: 1.1rem; height: 1.1rem; }
-    .q-result {
-      margin-top: 0.8rem;
-      font-weight: 600;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-    }
+    .q-result { margin-top: 0.8rem; font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 1rem; border-radius: 10px; }
     .q-result.correct { background: #dcfce7; color: #16a34a; }
     .q-result.wrong { background: #fee2e2; color: #dc2626; }
     .q-result .correct-answer { font-weight: 700; color: #0f172a; }
@@ -187,6 +121,43 @@
     .submit-area { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-top: 1.5rem; }
     .msg { background: #f1f5f9; padding: 1rem 1.4rem; border-radius: 20px; margin: 1.2rem 0; border-left: 5px solid #0f172a; }
     .hidden { display: none; }
+    
+    /* Accuracy Stats */
+    .accuracy-section {
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 1.2rem 1.5rem;
+      margin-top: 1.5rem;
+      border: 1px solid #e2e8f0;
+    }
+    .accuracy-title { font-weight: 700; font-size: 1rem; color: #0f172a; margin-bottom: 0.8rem; }
+    .accuracy-grid { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+    .accuracy-item {
+      background: white;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      border: 1px solid #e2e8f0;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .accuracy-item .quiz-num { font-weight: 700; color: #64748b; }
+    .accuracy-item .score { font-weight: 700; }
+    .accuracy-item .score.high { color: #16a34a; }
+    .accuracy-item .score.medium { color: #f59e0b; }
+    .accuracy-item .score.low { color: #dc2626; }
+    .accuracy-empty { color: #94a3b8; font-size: 0.9rem; }
+    .accuracy-summary {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .accuracy-summary-item { font-size: 0.9rem; color: #475569; }
+    .accuracy-summary-item .value { font-weight: 700; color: #0f172a; }
     
     .stats { display: flex; gap: 1.5rem; flex-wrap: wrap; border-top: 1px solid #e2e8f0; padding-top: 1.2rem; margin-top: 1.5rem; color: #475569; font-size: 0.95rem; }
     .stat-item { display: flex; align-items: center; gap: 0.3rem; }
@@ -202,6 +173,8 @@
       .q-sentence-wrapper { flex-wrap: wrap; }
       .q-blank { min-width: 80px; }
       .stats { gap: 0.8rem; font-size: 0.85rem; }
+      .accuracy-grid { gap: 0.5rem; }
+      .accuracy-item { font-size: 0.75rem; padding: 0.2rem 0.7rem; }
     }
   </style>
 </head>
@@ -215,6 +188,7 @@
     <span class="badge-quiz">🎯 Quiz</span>
     <span class="badge-blank">⬜ Fill-in-the-blank</span>
     <span class="badge-audio">🔊 Audio</span>
+    <span class="badge-accuracy">📊 Accuracy</span>
     <span class="badge-tracker">📊 Progress tracked</span>
   </div>
 
@@ -258,6 +232,21 @@
   <div id="quizContainer" class="hidden">
     <div id="quizBox" class="quiz-box"></div>
     <div id="msgBox" class="msg hidden"></div>
+    
+    <!-- Accuracy History -->
+    <div class="accuracy-section" id="accuracySection">
+      <div class="accuracy-title">📊 Quiz Accuracy History</div>
+      <div class="accuracy-summary" id="accuracySummary">
+        <span class="accuracy-summary-item">📝 Total Quizzes: <span class="value" id="totalQuizzes">0</span></span>
+        <span class="accuracy-summary-item">📈 Average Accuracy: <span class="value" id="avgAccuracy">0%</span></span>
+        <span class="accuracy-summary-item">🏆 Best Score: <span class="value" id="bestScore">0%</span></span>
+        <span class="accuracy-summary-item">📉 Worst Score: <span class="value" id="worstScore">0%</span></span>
+      </div>
+      <div class="accuracy-grid" id="accuracyGrid">
+        <span class="accuracy-empty">No quiz history yet. Complete a quiz to see your accuracy!</span>
+      </div>
+    </div>
+    
     <div class="submit-area">
       <button class="btn btn-success" id="submitQuizBtn" disabled>Submit → save progress</button>
       <button class="btn btn-danger btn-sm" id="resetProgressBtn">🔄 Reset progress</button>
@@ -788,36 +777,26 @@
   // Audio Function
   // ===================================================================
   function speakText(text, buttonElement) {
-    // Cancel any ongoing speech
     if (window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
     }
-    
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     utterance.rate = 0.9;
     utterance.pitch = 1;
-    
-    // Visual feedback
     if (buttonElement) {
       buttonElement.classList.add('playing');
-      buttonElement.textContent = '🔊';
     }
-    
     utterance.onend = function() {
       if (buttonElement) {
         buttonElement.classList.remove('playing');
-        buttonElement.textContent = '🔊';
       }
     };
-    
     utterance.onerror = function() {
       if (buttonElement) {
         buttonElement.classList.remove('playing');
-        buttonElement.textContent = '🔊';
       }
     };
-    
     window.speechSynthesis.speak(utterance);
   }
 
@@ -827,6 +806,7 @@
   let currentUser = '';
   let learnedSet = new Set();
   let quizCount = 0;
+  let accuracyHistory = []; // Array of {score, total, percent, date}
   let currentQuestions = [];
   let selectedAnswers = {};
   let submitted = false;
@@ -862,6 +842,11 @@
   const statRemaining = document.getElementById('statRemaining');
   const statTotal = document.getElementById('statTotal');
   const statQuizzes = document.getElementById('statQuizzes');
+  const totalQuizzesEl = document.getElementById('totalQuizzes');
+  const avgAccuracyEl = document.getElementById('avgAccuracy');
+  const bestScoreEl = document.getElementById('bestScore');
+  const worstScoreEl = document.getElementById('worstScore');
+  const accuracyGrid = document.getElementById('accuracyGrid');
 
   // ===================================================================
   // Helpers
@@ -899,7 +884,6 @@
     reviewStatus.className = 'review-status ' + (isLearned ? 'learned' : 'not-learned');
     pageInfo.textContent = `${index + 1} / ${total}`;
 
-    // Update audio button
     reviewAudioBtn.onclick = function() {
       speakText(item.s, reviewAudioBtn);
     };
@@ -924,7 +908,6 @@
     }
   }
 
-  // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     if (currentMode === 'review') {
       if (e.key === 'ArrowRight' || e.key === ' ') {
@@ -1001,7 +984,6 @@
     });
     quizBox.innerHTML = html;
 
-    // Attach audio listeners to quiz audio buttons
     document.querySelectorAll('.q-item .audio-btn').forEach(btn => {
       const sentence = btn.dataset.sentence;
       btn.addEventListener('click', function() {
@@ -1092,7 +1074,6 @@
       }
       const resultEl = document.getElementById(`result-${idx}`);
       if (resultEl) {
-        const blankSentence = createBlankSentence(q.s, q.w);
         resultEl.className = 'q-result ' + (isCorrect ? 'correct' : 'wrong');
         resultEl.innerHTML = isCorrect
           ? `✅ Correct! "${q.w}" fits perfectly.`
@@ -1103,9 +1084,22 @@
     newlyLearned.forEach(w => learnedSet.add(w));
     quizCount++;
 
+    // Save accuracy record
+    const total = currentQuestions.length;
+    const percent = Math.round((correctCount / total) * 100);
+    const record = {
+      quizNumber: quizCount,
+      correct: correctCount,
+      total: total,
+      percent: percent,
+      date: new Date().toISOString()
+    };
+    accuracyHistory.push(record);
+
     const updatedLearned = [...learnedSet];
-    saveProgress(currentUser, updatedLearned, quizCount).then(() => {
+    saveProgress(currentUser, updatedLearned, quizCount, accuracyHistory).then(() => {
       updateStats();
+      renderAccuracyHistory();
       if (currentMode === 'review') {
         renderReviewCard(reviewIndex);
       }
@@ -1115,7 +1109,7 @@
     submitBtn.disabled = true;
 
     const remaining = getAvailable().length;
-    let msg = `You got ${correctCount}/${currentQuestions.length} correct. (Quiz #${quizCount})`;
+    let msg = `You got ${correctCount}/${total} correct (${percent}%). (Quiz #${quizCount})`;
     if (remaining === 0) {
       msg += ' 🎉 You have learned ALL 500 words!';
     } else {
@@ -1124,6 +1118,48 @@
     msgBox.classList.remove('hidden');
     msgBox.textContent = msg;
     updateStats();
+  }
+
+  // ===================================================================
+  // Accuracy History Rendering
+  // ===================================================================
+  function renderAccuracyHistory() {
+    if (accuracyHistory.length === 0) {
+      accuracyGrid.innerHTML = `<span class="accuracy-empty">No quiz history yet. Complete a quiz to see your accuracy!</span>`;
+      totalQuizzesEl.textContent = '0';
+      avgAccuracyEl.textContent = '0%';
+      bestScoreEl.textContent = '0%';
+      worstScoreEl.textContent = '0%';
+      return;
+    }
+
+    const total = accuracyHistory.length;
+    const totalPercent = accuracyHistory.reduce((sum, r) => sum + r.percent, 0);
+    const avg = Math.round(totalPercent / total);
+    const best = Math.max(...accuracyHistory.map(r => r.percent));
+    const worst = Math.min(...accuracyHistory.map(r => r.percent));
+
+    totalQuizzesEl.textContent = total;
+    avgAccuracyEl.textContent = avg + '%';
+    bestScoreEl.textContent = best + '%';
+    worstScoreEl.textContent = worst + '%';
+
+    // Show last 20 quizzes (most recent first)
+    const show = accuracyHistory.slice(-20).reverse();
+    let html = '';
+    show.forEach((r, i) => {
+      const scoreClass = r.percent >= 80 ? 'high' : (r.percent >= 60 ? 'medium' : 'low');
+      const emoji = r.percent >= 80 ? '🌟' : (r.percent >= 60 ? '📊' : '📉');
+      html += `
+        <div class="accuracy-item">
+          <span class="quiz-num">#${r.quizNumber}</span>
+          <span class="score ${scoreClass}">${r.percent}%</span>
+          <span style="color:#94a3b8;font-size:0.75rem;">(${r.correct}/${r.total})</span>
+          ${emoji}
+        </div>
+      `;
+    });
+    accuracyGrid.innerHTML = html;
   }
 
   // ===================================================================
@@ -1144,6 +1180,7 @@
       reviewModeBtn.className = 'btn btn-secondary btn-sm';
       quizModeBtn.className = 'btn btn-primary btn-sm';
       modeIndicator.innerHTML = 'Currently: <strong>Quiz</strong>';
+      renderAccuracyHistory();
       startNewQuiz();
     }
   }
@@ -1151,11 +1188,12 @@
   // ===================================================================
   // Save/Load Progress
   // ===================================================================
-  function saveProgress(user, learnedArray, quizCountValue) {
+  function saveProgress(user, learnedArray, quizCountValue, history) {
     if (!user) return Promise.reject('no user');
     
     localStorage.setItem(`vocab_${user}`, JSON.stringify(learnedArray));
     localStorage.setItem(`vocab_quizzes_${user}`, quizCountValue);
+    localStorage.setItem(`vocab_history_${user}`, JSON.stringify(history || []));
     
     return fetch(SCRIPT_URL, {
       method: 'POST',
@@ -1164,7 +1202,8 @@
       body: JSON.stringify({ 
         user: user, 
         learned: learnedArray,
-        quizCount: quizCountValue
+        quizCount: quizCountValue,
+        history: history || []
       })
     }).catch(() => {});
   }
@@ -1178,14 +1217,17 @@
     userStatus.textContent = `👤 ${currentUser}`;
     learnedSet = new Set();
     quizCount = 0;
+    accuracyHistory = [];
     selectedAnswers = {};
     submitted = false;
     reviewIndex = 0;
 
     const localKey = `vocab_${currentUser}`;
     const quizKey = `vocab_quizzes_${currentUser}`;
+    const historyKey = `vocab_history_${currentUser}`;
     const localData = localStorage.getItem(localKey);
     const localQuizCount = parseInt(localStorage.getItem(quizKey) || '0', 10);
+    const localHistory = localStorage.getItem(historyKey);
 
     if (localData) {
       try {
@@ -1193,8 +1235,15 @@
         if (Array.isArray(arr)) {
           learnedSet = new Set(arr);
           quizCount = localQuizCount;
+          if (localHistory) {
+            const hist = JSON.parse(localHistory);
+            if (Array.isArray(hist)) {
+              accuracyHistory = hist;
+            }
+          }
           updateStats();
           renderReviewCard(0);
+          renderAccuracyHistory();
           switchMode('review');
           userStatus.textContent = `👤 ${currentUser} (local)`;
           return;
@@ -1215,17 +1264,24 @@
             quizCount = parseInt(data.quizCount, 10) || 0;
             localStorage.setItem(quizKey, quizCount);
           }
+          if (data.history && Array.isArray(data.history)) {
+            accuracyHistory = data.history;
+            localStorage.setItem(historyKey, JSON.stringify(accuracyHistory));
+          }
         }
         updateStats();
         renderReviewCard(0);
+        renderAccuracyHistory();
         switchMode('review');
         userStatus.textContent = `👤 ${currentUser} (synced)`;
       })
       .catch(() => {
         learnedSet = new Set();
         quizCount = 0;
+        accuracyHistory = [];
         updateStats();
         renderReviewCard(0);
+        renderAccuracyHistory();
         switchMode('review');
         userStatus.textContent = `👤 ${currentUser} (offline)`;
       });
@@ -1236,16 +1292,18 @@
       alert('Please load a user first.');
       return;
     }
-    if (!confirm(`Reset all progress for "${currentUser}"? This will clear learned words and reset quiz count.`)) return;
+    if (!confirm(`Reset all progress for "${currentUser}"? This will clear learned words, quiz count, and accuracy history.`)) return;
     learnedSet = new Set();
     quizCount = 0;
+    accuracyHistory = [];
     reviewIndex = 0;
-    saveProgress(currentUser, [], 0).then(() => {
+    saveProgress(currentUser, [], 0, []).then(() => {
       updateStats();
       renderReviewCard(0);
+      renderAccuracyHistory();
       switchMode('review');
       msgBox.classList.remove('hidden');
-      msgBox.textContent = '🔄 Progress reset. All words available again. Quiz count reset to 0.';
+      msgBox.textContent = '🔄 Progress reset. All words available again. Quiz count and accuracy reset to 0.';
     });
   }
 
@@ -1322,10 +1380,10 @@
     quizBox.innerHTML = `<div class="msg">👋 Load a user to start the quiz.</div>`;
     submitBtn.disabled = true;
     updateStats();
+    renderAccuracyHistory();
     switchMode('review');
   }
 
-  // Store last username
   const origLoad = loadUser;
   loadUser = function(username) {
     localStorage.setItem('lastUsername', username);
