@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>500 Nouns · Infinite Sentences + Quiz Tracker</title>
+  <title>500 Nouns · Review → Fill-in-the-Blank Quiz + Audio</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -22,9 +22,11 @@
     }
     h1 { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.01em; }
     .sub { color: #475569; margin-top: 0.2rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; }
-    .badge-fresh { background: #dbeafe; color: #1e40af; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.5rem; }
-    .badge-variety { background: #fef3c7; color: #92400e; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; }
+    .badge-review { background: #dbeafe; color: #1e40af; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.5rem; }
+    .badge-quiz { background: #fef3c7; color: #92400e; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; }
     .badge-tracker { background: #dcfce7; color: #166534; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; }
+    .badge-blank { background: #fce7f3; color: #9d174d; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; }
+    .badge-audio { background: #e0e7ff; color: #3730a3; padding: 0.1rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; }
     .user-area { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; margin: 1.2rem 0 1.5rem; }
     .user-area label { font-weight: 600; }
     .user-area input { flex: 1; min-width: 180px; padding: 0.6rem 1rem; border-radius: 40px; border: 1px solid #cbd5e1; }
@@ -32,38 +34,188 @@
     .user-area button:hover { background: #1e293b; }
     .user-area button:disabled { opacity: 0.5; pointer-events: none; }
     .status-badge { background: #e2e8f0; padding: 0.2rem 1rem; border-radius: 30px; font-size: 0.9rem; color: #1e293b; }
-    .quiz-box { margin: 1.8rem 0; }
-    .q-item { background: #f8fafc; border-radius: 18px; padding: 1.2rem 1.4rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
-    .q-word { font-weight: 700; font-size: 1.3rem; margin-bottom: 0.2rem; color: #0f172a; }
-    .q-sentence-label { font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.2rem; display: flex; gap: 0.6rem; align-items: center; }
-    .q-sentence { color: #334155; font-size: 1rem; margin-bottom: 0.6rem; padding: 0.5rem 0.8rem; background: #ffffff; border-radius: 10px; border-left: 4px solid #3b82f6; }
-    .q-options { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; margin-top: 0.4rem; }
-    .q-options label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.95rem; cursor: pointer; background: white; padding: 0.2rem 0.8rem 0.2rem 0.4rem; border-radius: 40px; border: 1px solid #e2e8f0; transition: 0.1s; }
-    .q-options label:hover { background: #f1f5f9; }
-    .q-options input { accent-color: #0f172a; width: 1.1rem; height: 1.1rem; }
-    .q-result { margin-top: 0.6rem; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 0.6rem; }
-    .correct { color: #16a34a; }
-    .wrong { color: #dc2626; }
-    .submit-area { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-top: 1.5rem; }
+    
+    .mode-controls { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin: 1.2rem 0; }
     .btn { background: #0f172a; color: white; border: none; padding: 0.7rem 2rem; border-radius: 60px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.15s; }
+    .btn-primary { background: #0f172a; color: white; }
     .btn-secondary { background: #e2e8f0; color: #0f172a; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-sm { padding: 0.4rem 1.2rem; font-size: 0.85rem; }
     .btn:hover { opacity: 0.85; transform: scale(0.97); }
     .btn:disabled { opacity: 0.4; pointer-events: none; }
+    
+    /* Review Card */
+    .review-card {
+      background: #f8fafc;
+      border-radius: 20px;
+      padding: 2rem 2rem;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .review-counter { position: absolute; top: 1rem; right: 1.5rem; font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
+    .review-word { font-size: 2.2rem; font-weight: 700; color: #0f172a; margin-bottom: 0.8rem; }
+    .review-sentence-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      max-width: 90%;
+      margin-bottom: 0.6rem;
+    }
+    .review-sentence {
+      font-size: 1.15rem;
+      color: #334155;
+      padding: 0.5rem 1rem;
+      background: #ffffff;
+      border-radius: 12px;
+      border-left: 4px solid #3b82f6;
+      flex: 1;
+    }
+    .review-translation { font-size: 0.95rem; color: #64748b; padding: 0.3rem 1rem; background: #f1f5f9; border-radius: 30px; }
+    .review-status { margin-top: 1rem; font-size: 0.9rem; font-weight: 600; }
+    .review-status.learned { color: #16a34a; }
+    .review-status.not-learned { color: #94a3b8; }
+    
+    .audio-btn {
+      background: #e0e7ff;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .audio-btn:hover { background: #c7d2fe; transform: scale(1.05); }
+    .audio-btn:active { transform: scale(0.95); }
+    .audio-btn.playing { background: #fca5a5; animation: pulse 0.5s ease-in-out; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    
+    .review-nav { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; align-items: center; }
+    .review-nav button { background: #0f172a; color: white; border: none; padding: 0.5rem 1.8rem; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.15s; }
+    .review-nav button:hover { opacity: 0.85; }
+    .review-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+    .review-nav .page-info { font-size: 0.95rem; color: #475569; min-width: 100px; text-align: center; }
+    .progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; margin: 1rem 0 0.5rem; overflow: hidden; }
+    .progress-fill { height: 100%; background: #3b82f6; border-radius: 4px; transition: width 0.3s; }
+    
+    /* Quiz Mode */
+    .quiz-box { margin: 1.8rem 0; }
+    .q-item {
+      background: #f8fafc;
+      border-radius: 18px;
+      padding: 1.5rem 1.8rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid #e2e8f0;
+    }
+    .q-number { font-size: 0.75rem; color: #94a3b8; font-weight: 600; margin-bottom: 0.5rem; }
+    .q-sentence-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .q-sentence {
+      font-size: 1.15rem;
+      color: #0f172a;
+      padding: 0.8rem 1rem;
+      background: #ffffff;
+      border-radius: 12px;
+      border-left: 4px solid #3b82f6;
+      line-height: 1.6;
+      flex: 1;
+    }
+    .q-blank {
+      display: inline-block;
+      min-width: 120px;
+      border-bottom: 3px solid #3b82f6;
+      margin: 0 4px;
+      padding: 0 4px;
+      font-weight: 700;
+      color: #1e40af;
+      background: #eff6ff;
+      border-radius: 4px;
+    }
+    .q-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+      margin-top: 0.6rem;
+    }
+    .q-options label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      background: white;
+      padding: 0.4rem 1rem 0.4rem 0.6rem;
+      border-radius: 40px;
+      border: 2px solid #e2e8f0;
+      transition: 0.15s;
+    }
+    .q-options label:hover { background: #f1f5f9; border-color: #94a3b8; }
+    .q-options label.selected { border-color: #3b82f6; background: #eff6ff; }
+    .q-options input { accent-color: #0f172a; width: 1.1rem; height: 1.1rem; }
+    .q-result {
+      margin-top: 0.8rem;
+      font-weight: 600;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+    }
+    .q-result.correct { background: #dcfce7; color: #16a34a; }
+    .q-result.wrong { background: #fee2e2; color: #dc2626; }
+    .q-result .correct-answer { font-weight: 700; color: #0f172a; }
+    
+    .submit-area { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-top: 1.5rem; }
     .msg { background: #f1f5f9; padding: 1rem 1.4rem; border-radius: 20px; margin: 1.2rem 0; border-left: 5px solid #0f172a; }
     .hidden { display: none; }
+    
     .stats { display: flex; gap: 1.5rem; flex-wrap: wrap; border-top: 1px solid #e2e8f0; padding-top: 1.2rem; margin-top: 1.5rem; color: #475569; font-size: 0.95rem; }
     .stat-item { display: flex; align-items: center; gap: 0.3rem; }
     .stat-number { font-weight: 700; color: #0f172a; }
-    @media (max-width: 500px) { .container { padding: 1.2rem; } .stats { gap: 0.8rem; font-size: 0.85rem; } }
+    
+    @media (max-width: 600px) {
+      .container { padding: 1.2rem; }
+      .review-word { font-size: 1.6rem; }
+      .review-sentence { font-size: 1rem; max-width: 100%; }
+      .review-card { padding: 1.5rem 1rem; min-height: 200px; }
+      .review-sentence-wrapper { max-width: 100%; flex-wrap: wrap; justify-content: center; }
+      .q-sentence { font-size: 1rem; }
+      .q-sentence-wrapper { flex-wrap: wrap; }
+      .q-blank { min-width: 80px; }
+      .stats { gap: 0.8rem; font-size: 0.85rem; }
+    }
   </style>
 </head>
 <body>
 <div class="container" id="app">
-  <h1>📘 500 Nouns · Infinite Sentences</h1>
-  <div class="sub">Every quiz uses a random fresh sentence — never the same twice! 
-    <span class="badge-fresh">✨ AI-generated</span>
-    <span class="badge-variety">♾️ 5+ per word</span>
-    <span class="badge-tracker">📊 Quiz tracker</span>
+  <h1>📘 500 Nouns · Review & Quiz</h1>
+  <div class="sub">
+    Step 1: Review one word at a time 
+    <span class="badge-review">📖 Review</span>
+    → Step 2: Fill in the blank 
+    <span class="badge-quiz">🎯 Quiz</span>
+    <span class="badge-blank">⬜ Fill-in-the-blank</span>
+    <span class="badge-audio">🔊 Audio</span>
+    <span class="badge-tracker">📊 Progress tracked</span>
   </div>
 
   <div class="user-area">
@@ -73,26 +225,57 @@
     <span class="status-badge" id="userStatus">not loaded</span>
   </div>
 
-  <div id="quizContainer">
+  <!-- Mode Controls -->
+  <div class="mode-controls">
+    <button class="btn btn-primary btn-sm" id="reviewModeBtn">📖 Review Mode</button>
+    <button class="btn btn-secondary btn-sm" id="quizModeBtn">🎯 Quiz Mode</button>
+    <span style="color:#94a3b8;font-size:0.85rem;" id="modeIndicator">Currently: <strong>Review</strong></span>
+  </div>
+
+  <!-- Review Section -->
+  <div id="reviewContainer">
+    <div class="progress-bar">
+      <div class="progress-fill" id="reviewProgress" style="width:0%"></div>
+    </div>
+    <div id="reviewCard" class="review-card">
+      <span class="review-counter" id="reviewCounter">0 / 500</span>
+      <div class="review-word" id="reviewWord">Loading...</div>
+      <div class="review-sentence-wrapper">
+        <div class="review-sentence" id="reviewSentence">Loading...</div>
+        <button class="audio-btn" id="reviewAudioBtn" title="Listen to sentence">🔊</button>
+      </div>
+      <div class="review-translation" id="reviewTranslation">Loading...</div>
+      <div class="review-status" id="reviewStatus"></div>
+    </div>
+    <div class="review-nav">
+      <button id="prevBtn">◀ Previous</button>
+      <span class="page-info" id="pageInfo">1 / 500</span>
+      <button id="nextBtn">Next ▶</button>
+    </div>
+  </div>
+
+  <!-- Quiz Section -->
+  <div id="quizContainer" class="hidden">
     <div id="quizBox" class="quiz-box"></div>
     <div id="msgBox" class="msg hidden"></div>
     <div class="submit-area">
-      <button class="btn" id="submitQuizBtn" disabled>Submit → save progress</button>
-      <button class="btn btn-secondary" id="resetProgressBtn">🔄 Reset progress</button>
-      <button class="btn btn-secondary" id="newQuizBtn">↻ New quiz</button>
+      <button class="btn btn-success" id="submitQuizBtn" disabled>Submit → save progress</button>
+      <button class="btn btn-danger btn-sm" id="resetProgressBtn">🔄 Reset progress</button>
+      <button class="btn btn-secondary btn-sm" id="newQuizBtn">↻ New quiz</button>
     </div>
-    <div class="stats" id="statsArea">
-      <span class="stat-item" id="statLearned">✅ Learned: <span class="stat-number">0</span></span>
-      <span class="stat-item" id="statRemaining">📚 Remaining: <span class="stat-number">500</span></span>
-      <span class="stat-item" id="statTotal">📖 Total: <span class="stat-number">500</span></span>
-      <span class="stat-item" id="statQuizzes">📝 Quizzes: <span class="stat-number">0</span></span>
-    </div>
+  </div>
+
+  <div class="stats" id="statsArea">
+    <span class="stat-item" id="statLearned">✅ Learned: <span class="stat-number">0</span></span>
+    <span class="stat-item" id="statRemaining">📚 Remaining: <span class="stat-number">500</span></span>
+    <span class="stat-item" id="statTotal">📖 Total: <span class="stat-number">500</span></span>
+    <span class="stat-item" id="statQuizzes">📝 Quizzes: <span class="stat-number">0</span></span>
   </div>
 </div>
 
 <script>
   // ===================================================================
-  //  MASTER DATA — your 500 words
+  //  MASTER DATA — all 500 words with example sentences
   // ===================================================================
   const MASTER = [
     {w:"etiquette", s:"Etiquette demands politeness at formal dinners.", t:"礼仪要求在正式晚宴上保持礼貌。"},
@@ -597,54 +780,84 @@
   ];
 
   // ===================================================================
-  //  FRESH SENTENCE BANK — 5+ unique sentences per word
-  //  (Full bank included in the full version — see previous response)
-  //  For brevity, I'm showing just the structure here.
-  //  In the actual file, all 500 words have 5+ sentences each.
-  // ===================================================================
-  const SENTENCE_BANK = {
-    "etiquette": [
-      "Knowing proper etiquette is essential when dining with royalty.",
-      "Online etiquette, or 'netiquette,' is often overlooked in forums.",
-      "The ambassador's etiquette helped avoid a diplomatic incident.",
-      "She studied Japanese etiquette before her business trip to Tokyo.",
-      "Etiquette varies widely across different cultures and traditions."
-    ],
-    // ... ALL 500 words with 5+ sentences each
-    // (Full bank included in complete file)
-    "patience": [
-      "Learning a language requires patience.",
-      "Patience is a virtue that pays off in the long run.",
-      "She waited with patience for the results.",
-      "The teacher praised the student's patience.",
-      "Patience is essential when dealing with children."
-    ]
-  };
-
-  // ===================================================================
   // Google Sheets Config
   // ===================================================================
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx1ob7rhAGuD5ixj3M6qUgOCWp0JHj9xwQXIUaCm7onUJIymXf2p4cwoY7PcZtVtJA/exec';
+
+  // ===================================================================
+  // Audio Function
+  // ===================================================================
+  function speakText(text, buttonElement) {
+    // Cancel any ongoing speech
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    
+    // Visual feedback
+    if (buttonElement) {
+      buttonElement.classList.add('playing');
+      buttonElement.textContent = '🔊';
+    }
+    
+    utterance.onend = function() {
+      if (buttonElement) {
+        buttonElement.classList.remove('playing');
+        buttonElement.textContent = '🔊';
+      }
+    };
+    
+    utterance.onerror = function() {
+      if (buttonElement) {
+        buttonElement.classList.remove('playing');
+        buttonElement.textContent = '🔊';
+      }
+    };
+    
+    window.speechSynthesis.speak(utterance);
+  }
 
   // ===================================================================
   // State
   // ===================================================================
   let currentUser = '';
   let learnedSet = new Set();
-  let quizCount = 0;  // ← NEW: track number of completed quizzes
+  let quizCount = 0;
   let currentQuestions = [];
   let selectedAnswers = {};
   let submitted = false;
+  let currentMode = 'review';
+  let reviewIndex = 0;
 
   // DOM refs
   const usernameInput = document.getElementById('username');
   const loadBtn = document.getElementById('loadUserBtn');
   const userStatus = document.getElementById('userStatus');
+  const reviewContainer = document.getElementById('reviewContainer');
+  const reviewCard = document.getElementById('reviewCard');
+  const reviewCounter = document.getElementById('reviewCounter');
+  const reviewWord = document.getElementById('reviewWord');
+  const reviewSentence = document.getElementById('reviewSentence');
+  const reviewTranslation = document.getElementById('reviewTranslation');
+  const reviewStatus = document.getElementById('reviewStatus');
+  const reviewProgress = document.getElementById('reviewProgress');
+  const reviewAudioBtn = document.getElementById('reviewAudioBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const pageInfo = document.getElementById('pageInfo');
+  const quizContainer = document.getElementById('quizContainer');
   const quizBox = document.getElementById('quizBox');
   const msgBox = document.getElementById('msgBox');
   const submitBtn = document.getElementById('submitQuizBtn');
   const resetBtn = document.getElementById('resetProgressBtn');
   const newQuizBtn = document.getElementById('newQuizBtn');
+  const reviewModeBtn = document.getElementById('reviewModeBtn');
+  const quizModeBtn = document.getElementById('quizModeBtn');
+  const modeIndicator = document.getElementById('modeIndicator');
   const statLearned = document.getElementById('statLearned');
   const statRemaining = document.getElementById('statRemaining');
   const statTotal = document.getElementById('statTotal');
@@ -665,14 +878,68 @@
     return MASTER.filter(item => !learnedSet.has(item.w));
   }
 
-  function getRandomSentence(word) {
-    const sentences = SENTENCE_BANK[word];
-    if (!sentences || sentences.length === 0) {
-      return `This is a sample sentence for the word "${word}".`;
-    }
-    return sentences[Math.floor(Math.random() * sentences.length)];
+  // ===================================================================
+  // Review Mode
+  // ===================================================================
+  function renderReviewCard(index) {
+    const total = MASTER.length;
+    const item = MASTER[index];
+    if (!item) return;
+
+    const isLearned = learnedSet.has(item.w);
+    const learnedCount = learnedSet.size;
+    const progress = total > 0 ? (learnedCount / total) * 100 : 0;
+
+    reviewProgress.style.width = progress + '%';
+    reviewCounter.textContent = `${index + 1} / ${total}`;
+    reviewWord.textContent = item.w;
+    reviewSentence.textContent = item.s;
+    reviewTranslation.textContent = item.t;
+    reviewStatus.textContent = isLearned ? '✅ Learned' : '📖 Not yet learned';
+    reviewStatus.className = 'review-status ' + (isLearned ? 'learned' : 'not-learned');
+    pageInfo.textContent = `${index + 1} / ${total}`;
+
+    // Update audio button
+    reviewAudioBtn.onclick = function() {
+      speakText(item.s, reviewAudioBtn);
+    };
+
+    prevBtn.disabled = index === 0;
+    nextBtn.disabled = index === total - 1;
+
+    updateStats();
   }
 
+  function goToPrev() {
+    if (reviewIndex > 0) {
+      reviewIndex--;
+      renderReviewCard(reviewIndex);
+    }
+  }
+
+  function goToNext() {
+    if (reviewIndex < MASTER.length - 1) {
+      reviewIndex++;
+      renderReviewCard(reviewIndex);
+    }
+  }
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (currentMode === 'review') {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        goToNext();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goToPrev();
+      }
+    }
+  });
+
+  // ===================================================================
+  // Quiz Mode
+  // ===================================================================
   function generateQuestions() {
     const available = getAvailable();
     if (available.length === 0) return [];
@@ -681,8 +948,12 @@
     return shuffled.slice(0, count).map((item, idx) => ({
       ...item,
       index: idx,
-      freshSentence: getRandomSentence(item.w)
     }));
+  }
+
+  function createBlankSentence(sentence, word) {
+    const regex = new RegExp('\\b' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+    return sentence.replace(regex, '__________');
   }
 
   function buildOptions(correctWord) {
@@ -692,9 +963,6 @@
     return shuffleArray([correctWord, ...distractors]);
   }
 
-  // ===================================================================
-  // Render Functions
-  // ===================================================================
   function renderQuiz(questions) {
     if (!questions || questions.length === 0) {
       quizBox.innerHTML = `
@@ -710,14 +978,18 @@
     questions.forEach((q, idx) => {
       const opts = buildOptions(q.w);
       const selected = selectedAnswers[idx] || '';
+      const blankSentence = createBlankSentence(q.s, q.w);
+      
       html += `
         <div class="q-item" data-qidx="${idx}">
-          <div class="q-word">${q.w}</div>
-          <div class="q-sentence-label">📝 Fresh sentence (random from bank):</div>
-          <div class="q-sentence">${q.freshSentence}</div>
+          <div class="q-number">Question ${idx + 1} of ${questions.length}</div>
+          <div class="q-sentence-wrapper">
+            <div class="q-sentence">${blankSentence}</div>
+            <button class="audio-btn" data-sentence="${q.s}" title="Listen to sentence">🔊</button>
+          </div>
           <div class="q-options">
             ${opts.map(opt => `
-              <label>
+              <label class="${selected === opt ? 'selected' : ''}">
                 <input type="radio" name="q${idx}" value="${opt}" ${selected === opt ? 'checked' : ''}>
                 ${opt}
               </label>
@@ -729,6 +1001,14 @@
     });
     quizBox.innerHTML = html;
 
+    // Attach audio listeners to quiz audio buttons
+    document.querySelectorAll('.q-item .audio-btn').forEach(btn => {
+      const sentence = btn.dataset.sentence;
+      btn.addEventListener('click', function() {
+        speakText(sentence, this);
+      });
+    });
+
     document.querySelectorAll('.q-item').forEach(el => {
       const idx = parseInt(el.dataset.qidx, 10);
       const radios = el.querySelectorAll('input[type="radio"]');
@@ -737,6 +1017,11 @@
           if (submitted) return;
           if (e.target.checked) {
             selectedAnswers[idx] = e.target.value;
+            const parent = e.target.closest('.q-item');
+            parent.querySelectorAll('.q-options label').forEach(label => {
+              label.classList.remove('selected');
+            });
+            e.target.closest('label').classList.add('selected');
           }
         });
       });
@@ -744,96 +1029,6 @@
     submitBtn.disabled = false;
     msgBox.classList.add('hidden');
     msgBox.textContent = '';
-  }
-
-  function updateStats() {
-    const total = MASTER.length;
-    const learned = learnedSet.size;
-    const remaining = total - learned;
-    
-    statLearned.querySelector('.stat-number').textContent = learned;
-    statRemaining.querySelector('.stat-number').textContent = remaining;
-    statTotal.querySelector('.stat-number').textContent = total;
-    statQuizzes.querySelector('.stat-number').textContent = quizCount;
-  }
-
-  // ===================================================================
-  // Core Functions
-  // ===================================================================
-  function loadUser(username) {
-    if (!username.trim()) {
-      userStatus.textContent = '⚠️ enter name';
-      return;
-    }
-    currentUser = username.trim();
-    userStatus.textContent = `👤 ${currentUser}`;
-    learnedSet = new Set();
-    quizCount = 0;
-    selectedAnswers = {};
-    submitted = false;
-
-    const localKey = `vocab_${currentUser}`;
-    const quizKey = `vocab_quizzes_${currentUser}`;
-    const localData = localStorage.getItem(localKey);
-    const localQuizCount = parseInt(localStorage.getItem(quizKey) || '0', 10);
-
-    if (localData) {
-      try {
-        const arr = JSON.parse(localData);
-        if (Array.isArray(arr)) {
-          learnedSet = new Set(arr);
-          quizCount = localQuizCount;
-          updateStats();
-          startNewQuiz();
-          userStatus.textContent = `👤 ${currentUser} (local)`;
-          return;
-        }
-      } catch(e) {}
-    }
-
-    // Fetch from Google Sheets
-    fetch(`${SCRIPT_URL}?user=${encodeURIComponent(currentUser)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data) {
-          if (Array.isArray(data.learned)) {
-            learnedSet = new Set(data.learned);
-            localStorage.setItem(localKey, JSON.stringify([...learnedSet]));
-          }
-          if (data.quizCount !== undefined) {
-            quizCount = parseInt(data.quizCount, 10) || 0;
-            localStorage.setItem(quizKey, quizCount);
-          }
-        }
-        updateStats();
-        startNewQuiz();
-        userStatus.textContent = `👤 ${currentUser} (synced)`;
-      })
-      .catch(() => {
-        learnedSet = new Set();
-        quizCount = 0;
-        updateStats();
-        startNewQuiz();
-        userStatus.textContent = `👤 ${currentUser} (offline)`;
-      });
-  }
-
-  function saveProgress(user, learnedArray, quizCountValue) {
-    if (!user) return Promise.reject('no user');
-    
-    localStorage.setItem(`vocab_${user}`, JSON.stringify(learnedArray));
-    localStorage.setItem(`vocab_quizzes_${user}`, quizCountValue);
-    
-    return fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        user: user, 
-        learned: learnedArray,
-        quizCount: quizCountValue
-      })
-    }).catch(() => {});
   }
 
   function startNewQuiz() {
@@ -857,7 +1052,10 @@
     submitted = false;
     renderQuiz(qs);
     updateStats();
-    document.querySelectorAll('.q-result').forEach(el => el.textContent = '');
+    document.querySelectorAll('.q-result').forEach(el => {
+      el.textContent = '';
+      el.className = 'q-result';
+    });
     msgBox.classList.add('hidden');
   }
 
@@ -894,20 +1092,24 @@
       }
       const resultEl = document.getElementById(`result-${idx}`);
       if (resultEl) {
+        const blankSentence = createBlankSentence(q.s, q.w);
+        resultEl.className = 'q-result ' + (isCorrect ? 'correct' : 'wrong');
         resultEl.innerHTML = isCorrect
-          ? `<span class="correct">✅ Correct</span>`
-          : `<span class="wrong">❌ Incorrect · correct: ${q.w}</span>`;
+          ? `✅ Correct! "${q.w}" fits perfectly.`
+          : `❌ Incorrect. The correct word is "<span class="correct-answer">${q.w}</span>".`;
       }
     });
 
-    // Add newly learned words
     newlyLearned.forEach(w => learnedSet.add(w));
-    
-    // ← NEW: Increment quiz count
     quizCount++;
-    
+
     const updatedLearned = [...learnedSet];
-    saveProgress(currentUser, updatedLearned, quizCount).then(() => updateStats());
+    saveProgress(currentUser, updatedLearned, quizCount).then(() => {
+      updateStats();
+      if (currentMode === 'review') {
+        renderReviewCard(reviewIndex);
+      }
+    });
 
     submitted = true;
     submitBtn.disabled = true;
@@ -924,6 +1126,111 @@
     updateStats();
   }
 
+  // ===================================================================
+  // Mode Switching
+  // ===================================================================
+  function switchMode(mode) {
+    currentMode = mode;
+    if (mode === 'review') {
+      reviewContainer.classList.remove('hidden');
+      quizContainer.classList.add('hidden');
+      reviewModeBtn.className = 'btn btn-primary btn-sm';
+      quizModeBtn.className = 'btn btn-secondary btn-sm';
+      modeIndicator.innerHTML = 'Currently: <strong>Review</strong>';
+      renderReviewCard(reviewIndex);
+    } else {
+      reviewContainer.classList.add('hidden');
+      quizContainer.classList.remove('hidden');
+      reviewModeBtn.className = 'btn btn-secondary btn-sm';
+      quizModeBtn.className = 'btn btn-primary btn-sm';
+      modeIndicator.innerHTML = 'Currently: <strong>Quiz</strong>';
+      startNewQuiz();
+    }
+  }
+
+  // ===================================================================
+  // Save/Load Progress
+  // ===================================================================
+  function saveProgress(user, learnedArray, quizCountValue) {
+    if (!user) return Promise.reject('no user');
+    
+    localStorage.setItem(`vocab_${user}`, JSON.stringify(learnedArray));
+    localStorage.setItem(`vocab_quizzes_${user}`, quizCountValue);
+    
+    return fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        user: user, 
+        learned: learnedArray,
+        quizCount: quizCountValue
+      })
+    }).catch(() => {});
+  }
+
+  function loadUser(username) {
+    if (!username.trim()) {
+      userStatus.textContent = '⚠️ enter name';
+      return;
+    }
+    currentUser = username.trim();
+    userStatus.textContent = `👤 ${currentUser}`;
+    learnedSet = new Set();
+    quizCount = 0;
+    selectedAnswers = {};
+    submitted = false;
+    reviewIndex = 0;
+
+    const localKey = `vocab_${currentUser}`;
+    const quizKey = `vocab_quizzes_${currentUser}`;
+    const localData = localStorage.getItem(localKey);
+    const localQuizCount = parseInt(localStorage.getItem(quizKey) || '0', 10);
+
+    if (localData) {
+      try {
+        const arr = JSON.parse(localData);
+        if (Array.isArray(arr)) {
+          learnedSet = new Set(arr);
+          quizCount = localQuizCount;
+          updateStats();
+          renderReviewCard(0);
+          switchMode('review');
+          userStatus.textContent = `👤 ${currentUser} (local)`;
+          return;
+        }
+      } catch(e) {}
+    }
+
+    // Fetch from Google Sheets
+    fetch(`${SCRIPT_URL}?user=${encodeURIComponent(currentUser)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          if (Array.isArray(data.learned)) {
+            learnedSet = new Set(data.learned);
+            localStorage.setItem(localKey, JSON.stringify([...learnedSet]));
+          }
+          if (data.quizCount !== undefined) {
+            quizCount = parseInt(data.quizCount, 10) || 0;
+            localStorage.setItem(quizKey, quizCount);
+          }
+        }
+        updateStats();
+        renderReviewCard(0);
+        switchMode('review');
+        userStatus.textContent = `👤 ${currentUser} (synced)`;
+      })
+      .catch(() => {
+        learnedSet = new Set();
+        quizCount = 0;
+        updateStats();
+        renderReviewCard(0);
+        switchMode('review');
+        userStatus.textContent = `👤 ${currentUser} (offline)`;
+      });
+  }
+
   function resetProgress() {
     if (!currentUser) {
       alert('Please load a user first.');
@@ -932,12 +1239,28 @@
     if (!confirm(`Reset all progress for "${currentUser}"? This will clear learned words and reset quiz count.`)) return;
     learnedSet = new Set();
     quizCount = 0;
+    reviewIndex = 0;
     saveProgress(currentUser, [], 0).then(() => {
       updateStats();
-      startNewQuiz();
+      renderReviewCard(0);
+      switchMode('review');
       msgBox.classList.remove('hidden');
       msgBox.textContent = '🔄 Progress reset. All words available again. Quiz count reset to 0.';
     });
+  }
+
+  // ===================================================================
+  // Update Stats
+  // ===================================================================
+  function updateStats() {
+    const total = MASTER.length;
+    const learned = learnedSet.size;
+    const remaining = total - learned;
+    
+    statLearned.querySelector('.stat-number').textContent = learned;
+    statRemaining.querySelector('.stat-number').textContent = remaining;
+    statTotal.querySelector('.stat-number').textContent = total;
+    statQuizzes.querySelector('.stat-number').textContent = quizCount;
   }
 
   // ===================================================================
@@ -948,6 +1271,9 @@
     if (!name) { userStatus.textContent = '⚠️ enter a name'; return; }
     loadUser(name);
   });
+
+  prevBtn.addEventListener('click', goToPrev);
+  nextBtn.addEventListener('click', goToNext);
 
   submitBtn.addEventListener('click', submitQuiz);
   resetBtn.addEventListener('click', resetProgress);
@@ -962,6 +1288,16 @@
     msgBox.classList.add('hidden');
   });
 
+  reviewModeBtn.addEventListener('click', () => {
+    if (!currentUser) { alert('Please load a user first.'); return; }
+    switchMode('review');
+  });
+
+  quizModeBtn.addEventListener('click', () => {
+    if (!currentUser) { alert('Please load a user first.'); return; }
+    switchMode('quiz');
+  });
+
   usernameInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') loadBtn.click();
   });
@@ -974,9 +1310,19 @@
     usernameInput.value = storedName;
     loadUser(storedName);
   } else {
-    quizBox.innerHTML = `<div class="msg">👋 Enter your name and click "Load / start" to begin.</div>`;
+    reviewWord.textContent = '👋 Enter your name';
+    reviewSentence.textContent = 'Click "Load / start" to begin reviewing.';
+    reviewTranslation.textContent = '';
+    reviewStatus.textContent = '';
+    reviewCounter.textContent = '0 / 500';
+    pageInfo.textContent = '0 / 500';
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    reviewAudioBtn.disabled = true;
+    quizBox.innerHTML = `<div class="msg">👋 Load a user to start the quiz.</div>`;
     submitBtn.disabled = true;
     updateStats();
+    switchMode('review');
   }
 
   // Store last username
